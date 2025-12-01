@@ -4,7 +4,7 @@ import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle } from 
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
-import { supabase } from "@/integrations/supabase/client";
+import { localDb, Loan } from "@/lib/localDb";
 import { toast } from "sonner";
 import {
   Tabs,
@@ -12,17 +12,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-
-interface Loan {
-  id: string;
-  person_name: string;
-  loan_amount: number;
-  loan_date: string;
-  amount_to_pay: number;
-  due_date: string;
-  status: string;
-  amount_received?: number;
-}
 
 const Index = () => {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -39,15 +28,10 @@ const Index = () => {
     filterLoans();
   }, [loans, activeTab]);
 
-  const fetchLoans = async () => {
+  const fetchLoans = () => {
     try {
-      const { data, error } = await supabase
-        .from("loans")
-        .select("*")
-        .order("due_date", { ascending: true });
-
-      if (error) throw error;
-      setLoans(data || []);
+      const data = localDb.getLoans();
+      setLoans(data);
     } catch (error) {
       console.error("Erro ao carregar empréstimos:", error);
       toast.error("Erro ao carregar empréstimos");
@@ -88,7 +72,7 @@ const Index = () => {
     setDialogOpen(true);
   };
 
-  const handlePayInterest = async (loan: Loan) => {
+  const handlePayInterest = (loan: Loan) => {
     try {
       // Calcular diferença entre valor a receber e valor emprestado
       const interestAmount = loan.amount_to_pay - loan.loan_amount;
@@ -97,15 +81,10 @@ const Index = () => {
       const newDueDate = new Date(loan.due_date + "T00:00:00");
       newDueDate.setMonth(newDueDate.getMonth() + 1);
 
-      const { error } = await supabase
-        .from("loans")
-        .update({
-          due_date: newDueDate.toISOString().split("T")[0],
-          amount_received: (loan.amount_received || 0) + interestAmount,
-        })
-        .eq("id", loan.id);
-
-      if (error) throw error;
+      localDb.updateLoan(loan.id, {
+        due_date: newDueDate.toISOString().split("T")[0],
+        amount_received: loan.amount_received + interestAmount,
+      });
 
       toast.success(
         `Juros de ${interestAmount.toLocaleString("pt-BR", {
@@ -131,7 +110,7 @@ const Index = () => {
     .reduce((sum, l) => sum + l.amount_to_pay, 0) +
     loans
       .filter((l) => l.status === "Aberto")
-      .reduce((sum, l) => sum + (l.amount_received || 0), 0);
+      .reduce((sum, l) => sum + l.amount_received, 0);
   const totalProfit = totalReceived - loans.filter((l) => l.status === "Pago").reduce((sum, l) => sum + l.loan_amount, 0);
   const profitPercentage = totalLoaned > 0 ? ((totalProfit / totalLoaned) * 100).toFixed(1) : "0.0";
 

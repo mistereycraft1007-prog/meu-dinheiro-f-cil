@@ -17,18 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { localDb, Loan } from "@/lib/localDb";
 import { toast } from "sonner";
-
-interface Loan {
-  id: string;
-  person_name: string;
-  loan_amount: number;
-  loan_date: string;
-  amount_to_pay: number;
-  due_date: string;
-  status: string;
-}
 
 interface LoanDialogProps {
   open: boolean;
@@ -69,7 +59,7 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
     }
   }, [loan, open]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.person_name || !formData.loan_amount || !formData.amount_to_pay || !formData.due_date) {
@@ -88,17 +78,10 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
       };
 
       if (loan) {
-        const { error } = await supabase
-          .from("loans")
-          .update(loanData)
-          .eq("id", loan.id);
-
-        if (error) throw error;
+        localDb.updateLoan(loan.id, loanData);
         toast.success("Empréstimo atualizado com sucesso!");
       } else {
-        const { error } = await supabase.from("loans").insert([loanData]);
-
-        if (error) throw error;
+        localDb.addLoan(loanData);
         toast.success("Empréstimo adicionado com sucesso!");
       }
 
