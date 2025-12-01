@@ -149,7 +149,7 @@ const Index = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           <StatCard
             title="Total Emprestado"
             value={totalLoaned.toLocaleString("pt-BR", {
@@ -160,7 +160,16 @@ const Index = () => {
             variant="default"
           />
           <StatCard
-            title="A Receber"
+            title="Total a Receber"
+            value={totalExpectedReturn.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+            icon={TrendingUp}
+            variant="warning"
+          />
+          <StatCard
+            title="A Receber (Abertos)"
             value={totalToReceive.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
