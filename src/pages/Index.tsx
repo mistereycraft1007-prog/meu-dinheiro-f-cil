@@ -21,6 +21,7 @@ interface Loan {
   amount_to_pay: number;
   due_date: string;
   status: string;
+  amount_received?: number;
 }
 
 const Index = () => {
@@ -100,6 +101,7 @@ const Index = () => {
         .from("loans")
         .update({
           due_date: newDueDate.toISOString().split("T")[0],
+          amount_received: (loan.amount_received || 0) + interestAmount,
         })
         .eq("id", loan.id);
 
@@ -126,7 +128,10 @@ const Index = () => {
     .reduce((sum, l) => sum + l.amount_to_pay, 0);
   const totalReceived = loans
     .filter((l) => l.status === "Pago")
-    .reduce((sum, l) => sum + l.amount_to_pay, 0);
+    .reduce((sum, l) => sum + l.amount_to_pay, 0) +
+    loans
+      .filter((l) => l.status === "Aberto")
+      .reduce((sum, l) => sum + (l.amount_received || 0), 0);
   const totalProfit = totalReceived - loans.filter((l) => l.status === "Pago").reduce((sum, l) => sum + l.loan_amount, 0);
   const profitPercentage = totalLoaned > 0 ? ((totalProfit / totalLoaned) * 100).toFixed(1) : "0.0";
 

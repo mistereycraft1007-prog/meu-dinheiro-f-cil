@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       loans: {
         Row: {
+          amount_received: number
           amount_to_pay: number
           created_at: string
           due_date: string
@@ -27,6 +28,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amount_received?: number
           amount_to_pay: number
           created_at?: string
           due_date: string
@@ -38,6 +40,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amount_received?: number
           amount_to_pay?: number
           created_at?: string
           due_date?: string
