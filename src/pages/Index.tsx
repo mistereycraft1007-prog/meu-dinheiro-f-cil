@@ -118,7 +118,9 @@ const Index = () => {
     loans
       .filter((l) => l.status === "Aberto")
       .reduce((sum, l) => sum + l.amount_received, 0);
-  const totalProfit = totalReceived - loans.filter((l) => l.status === "Pago").reduce((sum, l) => sum + l.loan_amount, 0);
+  // Lucro = (Total a receber dos abertos + Total recebido dos pagos) - Total emprestado
+  const totalExpectedReturn = loans.reduce((sum, l) => sum + l.amount_to_pay, 0);
+  const totalProfit = totalExpectedReturn - totalLoaned;
   const profitPercentage = totalLoaned > 0 ? ((totalProfit / totalLoaned) * 100).toFixed(1) : "0.0";
 
   const overdueLoans = loans.filter((l) => {
