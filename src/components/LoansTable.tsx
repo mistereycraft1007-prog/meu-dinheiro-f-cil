@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, AlertCircle, Calendar } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { localDb, Loan } from "@/lib/localDb";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -22,16 +22,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface Loan {
-  id: string;
-  person_name: string;
-  loan_amount: number;
-  loan_date: string;
-  amount_to_pay: number;
-  due_date: string;
-  status: string;
-}
 
 interface LoansTableProps {
   loans: Loan[];
@@ -62,14 +52,11 @@ export function LoansTable({ loans, onEdit, onDelete, onPayInterest }: LoansTabl
     return due < today;
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteId) return;
 
     try {
-      const { error } = await supabase.from("loans").delete().eq("id", deleteId);
-
-      if (error) throw error;
-
+      localDb.deleteLoan(deleteId);
       toast.success("Empréstimo excluído com sucesso!");
       onDelete();
       setDeleteId(null);
