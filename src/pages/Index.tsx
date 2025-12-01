@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle } from "lucide-react";
+import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, Upload, Trash2 } from "lucide-react";
+import { importExcelData, clearAllData } from "@/lib/seedData";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
@@ -72,6 +73,22 @@ const Index = () => {
     setDialogOpen(true);
   };
 
+  const handleImportExcel = () => {
+    const imported = importExcelData();
+    if (imported) {
+      toast.success(`${imported} empréstimos importados com sucesso!`);
+      fetchLoans();
+    }
+  };
+
+  const handleClearAll = () => {
+    const cleared = clearAllData();
+    if (cleared) {
+      toast.success("Todos os dados foram apagados!");
+      fetchLoans();
+    }
+  };
+
   const handlePayInterest = (loan: Loan) => {
     try {
       // Calcular diferença entre valor a receber e valor emprestado
@@ -133,10 +150,20 @@ const Index = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Gerencie seus empréstimos de forma simples e eficiente</p>
           </div>
-          <Button onClick={handleAdd} size="lg" className="gap-2">
-            <Plus className="h-5 w-5" />
-            Novo Empréstimo
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={handleImportExcel} size="lg" variant="outline" className="gap-2">
+              <Upload className="h-5 w-5" />
+              Importar Planilha
+            </Button>
+            <Button onClick={handleAdd} size="lg" className="gap-2">
+              <Plus className="h-5 w-5" />
+              Novo Empréstimo
+            </Button>
+            <Button onClick={handleClearAll} size="lg" variant="destructive" className="gap-2">
+              <Trash2 className="h-5 w-5" />
+              Limpar Tudo
+            </Button>
+          </div>
         </div>
 
         {/* Statistics Cards */}
