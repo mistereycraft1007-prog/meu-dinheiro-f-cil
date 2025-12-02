@@ -30,7 +30,7 @@ export function StatCard({ title, value, icon: Icon, variant = "default" }: Stat
         <Icon className={`h-5 w-5 ${iconClasses[variant]}`} />
       </CardHeader>
       <CardContent>
-        <div className="text-xl sm:text-2xl font-bold break-words">{value}</div>
+        <div className="text-lg sm:text-xl md:text-2xl font-bold whitespace-nowrap overflow-hidden text-ellipsis">{value}</div>
       </CardContent>
     </Card>
   );
