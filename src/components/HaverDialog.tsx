@@ -43,10 +43,13 @@ export function HaverDialog({ open, onOpenChange, loan, onSuccess }: HaverDialog
       const newDueDate = new Date(loan.due_date + "T00:00:00");
       newDueDate.setMonth(newDueDate.getMonth() + 1);
 
+      const isPaidOff = newAmountToPay <= 0;
+
       localDb.updateLoan(loan.id, {
-        amount_to_pay: newAmountToPay,
+        amount_to_pay: Math.max(newAmountToPay, 0),
         amount_received: loan.amount_received + haverAmount,
         due_date: newDueDate.toISOString().split("T")[0],
+        ...(isPaidOff ? { status: "Pago" } : {}),
       });
 
       localDb.addTransaction({
