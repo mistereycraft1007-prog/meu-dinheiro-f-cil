@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, AlertCircle, Calendar } from "lucide-react";
+import { Pencil, Trash2, AlertCircle, Calendar, HandCoins } from "lucide-react";
 import { localDb, Loan } from "@/lib/localDb";
 import { toast } from "sonner";
 import {
@@ -28,9 +28,10 @@ interface LoansTableProps {
   onEdit: (loan: Loan) => void;
   onDelete: () => void;
   onPayInterest: (loan: Loan) => void;
+  onHaver: (loan: Loan) => void;
 }
 
-export function LoansTable({ loans, onEdit, onDelete, onPayInterest }: LoansTableProps) {
+export function LoansTable({ loans, onEdit, onDelete, onPayInterest, onHaver }: LoansTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const formatCurrency = (value: number) => {
@@ -111,14 +112,24 @@ export function LoansTable({ loans, onEdit, onDelete, onPayInterest }: LoansTabl
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       {loan.status === "Aberto" && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onPayInterest(loan)}
-                          title="Pagar juros e adiar 1 mês"
-                        >
-                          <Calendar className="h-4 w-4" />
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onHaver(loan)}
+                            title="Haver - pagamento parcial"
+                          >
+                            <HandCoins className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onPayInterest(loan)}
+                            title="Pagar juros e adiar 1 mês"
+                          >
+                            <Calendar className="h-4 w-4" />
+                          </Button>
+                        </>
                       )}
                       <Button size="sm" variant="outline" onClick={() => onEdit(loan)}>
                         <Pencil className="h-4 w-4" />

@@ -17,7 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { localDb, Loan } from "@/lib/localDb";
+import { TransactionHistory } from "@/components/TransactionHistory";
 import { toast } from "sonner";
 
 interface LoanDialogProps {
@@ -36,6 +38,8 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
     due_date: "",
     status: "Aberto",
   });
+
+  const transactions = loan ? localDb.getTransactions(loan.id) : [];
 
   useEffect(() => {
     if (loan) {
@@ -78,6 +82,22 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
       };
 
       if (loan) {
+        // Check if status changed to "Pago"
+        if (loan.status !== "Pago" && loanData.status === "Pago") {
+          localDb.addTransaction({
+            loan_id: loan.id,
+            type: "pagamento_total",
+            amount: loan.amount_to_pay,
+            description: `Pagamento total - R$ ${loan.amount_to_pay.toFixed(2)}`,
+          });
+        } else {
+          localDb.addTransaction({
+            loan_id: loan.id,
+            type: "edicao",
+            amount: 0,
+            description: `Dados editados manualmente`,
+          });
+        }
         localDb.updateLoan(loan.id, loanData);
         toast.success("Empréstimo atualizado com sucesso!");
       } else {
@@ -95,7 +115,7 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{loan ? "Editar Empréstimo" : "Novo Empréstimo"}</DialogTitle>
           <DialogDescription>
@@ -154,6 +174,7 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
                   type="date"
                   value={formData.due_date}
                   onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                  placeholder=""
                 />
               </div>
             </div>
@@ -169,6 +190,19 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Transaction History */}
+            {loan && (
+              <>
+                <Separator />
+                <div>
+                  <Label className="text-base font-semibold">Histórico de Transações</Label>
+                  <div className="mt-2">
+                    <TransactionHistory transactions={transactions} />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
