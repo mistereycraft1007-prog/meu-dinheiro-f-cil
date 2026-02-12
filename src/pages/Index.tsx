@@ -5,6 +5,7 @@ import { importExcelData } from "@/lib/seedData";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
+import { HaverDialog } from "@/components/HaverDialog";
 import { localDb, Loan } from "@/lib/localDb";
 import { toast } from "sonner";
 import {
@@ -20,6 +21,8 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [haverDialogOpen, setHaverDialogOpen] = useState(false);
+  const [haverLoan, setHaverLoan] = useState<Loan | null>(null);
 
   useEffect(() => {
     fetchLoans();
@@ -81,16 +84,20 @@ const Index = () => {
 
   const handlePayInterest = (loan: Loan) => {
     try {
-      // Calcular diferença entre valor a receber e valor emprestado
       const interestAmount = loan.amount_to_pay - loan.loan_amount;
-
-      // Adicionar 1 mês à data de vencimento
       const newDueDate = new Date(loan.due_date + "T00:00:00");
       newDueDate.setMonth(newDueDate.getMonth() + 1);
 
       localDb.updateLoan(loan.id, {
         due_date: newDueDate.toISOString().split("T")[0],
         amount_received: loan.amount_received + interestAmount,
+      });
+
+      localDb.addTransaction({
+        loan_id: loan.id,
+        type: "juros",
+        amount: interestAmount,
+        description: `Juros pagos: R$ ${interestAmount.toFixed(2)} - Vencimento adiado para ${newDueDate.toLocaleDateString("pt-BR")}`,
       });
 
       toast.success(
@@ -105,6 +112,11 @@ const Index = () => {
       console.error("Erro ao pagar juros:", error);
       toast.error("Erro ao processar pagamento de juros");
     }
+  };
+
+  const handleHaver = (loan: Loan) => {
+    setHaverLoan(loan);
+    setHaverDialogOpen(true);
   };
 
   // Calcular estatísticas
@@ -232,12 +244,14 @@ const Index = () => {
               onEdit={handleEdit}
               onDelete={fetchLoans}
               onPayInterest={handlePayInterest}
+              onHaver={handleHaver}
             />
           </TabsContent>
         </Tabs>
       </div>
 
       <LoanDialog open={dialogOpen} onOpenChange={setDialogOpen} loan={selectedLoan} onSuccess={fetchLoans} />
+      <HaverDialog open={haverDialogOpen} onOpenChange={setHaverDialogOpen} loan={haverLoan} onSuccess={fetchLoans} />
     </div>
   );
 };

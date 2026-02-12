@@ -1,3 +1,13 @@
+export interface Transaction {
+  id: string;
+  loan_id: string;
+  type: "haver" | "juros" | "pagamento_total" | "criacao" | "edicao";
+  amount: number;
+  description: string;
+  date: string;
+  created_at: string;
+}
+
 export interface Loan {
   id: string;
   person_name: string;
@@ -12,6 +22,7 @@ export interface Loan {
 }
 
 const STORAGE_KEY = 'loans_db';
+const TRANSACTIONS_KEY = 'loans_transactions';
 
 export const localDb = {
   getLoans: (): Loan[] => {
@@ -30,6 +41,14 @@ export const localDb = {
     };
     loans.push(newLoan);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(loans));
+
+    localDb.addTransaction({
+      loan_id: newLoan.id,
+      type: "criacao",
+      amount: newLoan.loan_amount,
+      description: `Empréstimo criado - Valor: R$ ${newLoan.loan_amount.toFixed(2)}`,
+    });
+
     return newLoan;
   },
 
@@ -53,6 +72,35 @@ export const localDb = {
     if (filtered.length === loans.length) return false;
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    // Also delete transactions
+    const transactions = localDb.getTransactions(id);
+    const allTransactions = localDb.getAllTransactions().filter(t => t.loan_id !== id);
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(allTransactions));
     return true;
+  },
+
+  // Transaction methods
+  getAllTransactions: (): Transaction[] => {
+    const data = localStorage.getItem(TRANSACTIONS_KEY);
+    return data ? JSON.parse(data) : [];
+  },
+
+  getTransactions: (loanId: string): Transaction[] => {
+    return localDb.getAllTransactions()
+      .filter(t => t.loan_id === loanId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  },
+
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'created_at' | 'date'>): Transaction => {
+    const allTransactions = localDb.getAllTransactions();
+    const newTransaction: Transaction = {
+      ...transaction,
+      id: crypto.randomUUID(),
+      date: new Date().toISOString().split("T")[0],
+      created_at: new Date().toISOString(),
+    };
+    allTransactions.push(newTransaction);
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(allTransactions));
+    return newTransaction;
   },
 };
