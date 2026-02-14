@@ -1,26 +1,15 @@
 import { useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, AlertCircle, Calendar, HandCoins } from "lucide-react";
-import { localDb, Loan } from "@/lib/localDb";
+import { cloudDb, Loan } from "@/lib/cloudDb";
 import { toast } from "sonner";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 interface LoansTableProps {
@@ -34,30 +23,23 @@ interface LoansTableProps {
 export function LoansTable({ loans, onEdit, onDelete, onPayInterest, onHaver }: LoansTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-  const formatDate = (date: string) => {
-    return new Date(date + "T00:00:00").toLocaleDateString("pt-BR");
-  };
+  const formatDate = (date: string) =>
+    new Date(date + "T00:00:00").toLocaleDateString("pt-BR");
 
   const isOverdue = (dueDate: string, status: string) => {
     if (status === "Pago") return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate + "T00:00:00");
-    return due < today;
+    return new Date(dueDate + "T00:00:00") < today;
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return;
-
     try {
-      localDb.deleteLoan(deleteId);
+      await cloudDb.deleteLoan(deleteId);
       toast.success("Empréstimo excluído com sucesso!");
       onDelete();
       setDeleteId(null);
@@ -93,14 +75,12 @@ export function LoansTable({ loans, onEdit, onDelete, onPayInterest, onHaver }: 
               loans.map((loan) => (
                 <TableRow key={loan.id} className={isOverdue(loan.due_date, loan.status) ? "bg-destructive/5" : ""}>
                   <TableCell className="font-medium">{loan.person_name}</TableCell>
-                  <TableCell>{formatCurrency(loan.loan_amount)}</TableCell>
-                  <TableCell className="font-semibold text-success">{formatCurrency(loan.amount_to_pay)}</TableCell>
+                  <TableCell>{formatCurrency(Number(loan.loan_amount))}</TableCell>
+                  <TableCell className="font-semibold text-success">{formatCurrency(Number(loan.amount_to_pay))}</TableCell>
                   <TableCell>{formatDate(loan.loan_date)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      {isOverdue(loan.due_date, loan.status) && (
-                        <AlertCircle className="h-4 w-4 text-destructive" />
-                      )}
+                      {isOverdue(loan.due_date, loan.status) && <AlertCircle className="h-4 w-4 text-destructive" />}
                       {formatDate(loan.due_date)}
                     </div>
                   </TableCell>
@@ -113,20 +93,10 @@ export function LoansTable({ loans, onEdit, onDelete, onPayInterest, onHaver }: 
                     <div className="flex justify-end gap-2">
                       {loan.status === "Aberto" && (
                         <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => onHaver(loan)}
-                            title="Haver - pagamento parcial"
-                          >
+                          <Button size="sm" variant="outline" onClick={() => onHaver(loan)} title="Haver - pagamento parcial">
                             <HandCoins className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => onPayInterest(loan)}
-                            title="Pagar juros e adiar 1 mês"
-                          >
+                          <Button size="sm" variant="outline" onClick={() => onPayInterest(loan)} title="Pagar juros e adiar 1 mês">
                             <Calendar className="h-4 w-4" />
                           </Button>
                         </>
@@ -150,9 +120,7 @@ export function LoansTable({ loans, onEdit, onDelete, onPayInterest, onHaver }: 
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este empréstimo? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Tem certeza que deseja excluir este empréstimo? Esta ação não pode ser desfeita.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>

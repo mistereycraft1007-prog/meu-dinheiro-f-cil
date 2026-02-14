@@ -1,4 +1,4 @@
-import { Transaction } from "@/lib/localDb";
+import { Transaction } from "@/lib/cloudDb";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DollarSign, Calendar, PlusCircle, Pencil, CreditCard } from "lucide-react";
