@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle } from "lucide-react";
-import { importExcelData } from "@/lib/seedData";
+import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HaverDialog } from "@/components/HaverDialog";
-import { localDb, Loan } from "@/lib/localDb";
+import { cloudDb, Loan } from "@/lib/cloudDb";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
   Tabs,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tabs";
 
 const Index = () => {
+  const { signOut } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [filteredLoans, setFilteredLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -26,21 +27,15 @@ const Index = () => {
 
   useEffect(() => {
     fetchLoans();
-    // Importar dados da planilha automaticamente se não houver dados
-    const loans = localDb.getLoans();
-    if (loans.length === 0) {
-      importExcelData();
-      fetchLoans();
-    }
   }, []);
 
   useEffect(() => {
     filterLoans();
   }, [loans, activeTab]);
 
-  const fetchLoans = () => {
+  const fetchLoans = async () => {
     try {
-      const data = localDb.getLoans();
+      const data = await cloudDb.getLoans();
       setLoans(data);
     } catch (error) {
       console.error("Erro ao carregar empréstimos:", error);
@@ -82,18 +77,18 @@ const Index = () => {
     setDialogOpen(true);
   };
 
-  const handlePayInterest = (loan: Loan) => {
+  const handlePayInterest = async (loan: Loan) => {
     try {
       const interestAmount = loan.amount_to_pay - loan.loan_amount;
       const newDueDate = new Date(loan.due_date + "T00:00:00");
       newDueDate.setMonth(newDueDate.getMonth() + 1);
 
-      localDb.updateLoan(loan.id, {
+      await cloudDb.updateLoan(loan.id, {
         due_date: newDueDate.toISOString().split("T")[0],
         amount_received: loan.amount_received + interestAmount,
       });
 
-      localDb.addTransaction({
+      await cloudDb.addTransaction({
         loan_id: loan.id,
         type: "juros",
         amount: interestAmount,
@@ -120,18 +115,17 @@ const Index = () => {
   };
 
   // Calcular estatísticas
-  const totalLoaned = loans.reduce((sum, l) => sum + l.loan_amount, 0);
+  const totalLoaned = loans.reduce((sum, l) => sum + Number(l.loan_amount), 0);
   const totalToReceive = loans
     .filter((l) => l.status === "Aberto")
-    .reduce((sum, l) => sum + l.amount_to_pay, 0);
+    .reduce((sum, l) => sum + Number(l.amount_to_pay), 0);
   const totalReceived = loans
     .filter((l) => l.status === "Pago")
-    .reduce((sum, l) => sum + l.amount_to_pay, 0) +
+    .reduce((sum, l) => sum + Number(l.amount_to_pay), 0) +
     loans
       .filter((l) => l.status === "Aberto")
-      .reduce((sum, l) => sum + l.amount_received, 0);
-  // Lucro = (Total a receber dos abertos + Total recebido dos pagos) - Total emprestado
-  const totalExpectedReturn = loans.reduce((sum, l) => sum + l.amount_to_pay, 0);
+      .reduce((sum, l) => sum + Number(l.amount_received), 0);
+  const totalExpectedReturn = loans.reduce((sum, l) => sum + Number(l.amount_to_pay), 0);
   const totalProfit = totalExpectedReturn - totalLoaned;
   const profitPercentage = totalLoaned > 0 ? ((totalProfit / totalLoaned) * 100).toFixed(1) : "0.0";
 
@@ -154,65 +148,25 @@ const Index = () => {
             </h1>
             <p className="text-muted-foreground mt-1">Gerencie seus empréstimos de forma simples e eficiente</p>
           </div>
-          <Button onClick={handleAdd} size="lg" className="gap-2">
-            <Plus className="h-5 w-5" />
-            Novo Empréstimo
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleAdd} size="lg" className="gap-2">
+              <Plus className="h-5 w-5" />
+              Novo Empréstimo
+            </Button>
+            <Button onClick={signOut} size="lg" variant="outline" className="gap-2">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-          <StatCard
-            title="Total Emprestado"
-            value={totalLoaned.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            icon={DollarSign}
-            variant="default"
-          />
-          <StatCard
-            title="Total a Receber"
-            value={totalExpectedReturn.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            icon={TrendingUp}
-            variant="warning"
-          />
-          <StatCard
-            title="A Receber (Abertos)"
-            value={totalToReceive.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            icon={Clock}
-            variant="warning"
-          />
-          <StatCard
-            title="Já Recebido"
-            value={totalReceived.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            icon={CheckCircle}
-            variant="success"
-          />
-          <StatCard
-            title="Lucro Total"
-            value={totalProfit.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            icon={TrendingUp}
-            variant="success"
-          />
-          <StatCard
-            title="% Lucro"
-            value={`${profitPercentage}%`}
-            icon={TrendingUp}
-            variant="success"
-          />
+          <StatCard title="Total Emprestado" value={totalLoaned.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={DollarSign} variant="default" />
+          <StatCard title="Total a Receber" value={totalExpectedReturn.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={TrendingUp} variant="warning" />
+          <StatCard title="A Receber (Abertos)" value={totalToReceive.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={Clock} variant="warning" />
+          <StatCard title="Já Recebido" value={totalReceived.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={CheckCircle} variant="success" />
+          <StatCard title="Lucro Total" value={totalProfit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={TrendingUp} variant="success" />
+          <StatCard title="% Lucro" value={`${profitPercentage}%`} icon={TrendingUp} variant="success" />
         </div>
 
         {/* Overdue Alert */}
@@ -223,9 +177,7 @@ const Index = () => {
               <p className="font-semibold text-destructive">
                 {overdueLoans.length} empréstimo{overdueLoans.length > 1 ? "s" : ""} atrasado{overdueLoans.length > 1 ? "s" : ""}!
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Clique na aba "Atrasados" para visualizar
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Clique na aba "Atrasados" para visualizar</p>
             </div>
           </div>
         )}
