@@ -1,5 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 
+const getUserId = async (): Promise<string> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Usuário não autenticado");
+  return user.id;
+};
+
 export interface Loan {
   id: string;
   person_name: string;
@@ -34,6 +40,7 @@ export const cloudDb = {
   },
 
   addLoan: async (loan: Omit<Loan, "id" | "created_at" | "updated_at" | "amount_received">): Promise<Loan> => {
+    const userId = await getUserId();
     const { data, error } = await supabase
       .from("loans")
       .insert({
@@ -44,6 +51,7 @@ export const cloudDb = {
         due_date: loan.due_date,
         status: loan.status,
         amount_received: 0,
+        user_id: userId,
       })
       .select()
       .single();
@@ -86,6 +94,7 @@ export const cloudDb = {
   },
 
   addTransaction: async (transaction: Omit<Transaction, "id" | "created_at" | "date">): Promise<Transaction> => {
+    const userId = await getUserId();
     const { data, error } = await supabase
       .from("transactions")
       .insert({
@@ -93,6 +102,7 @@ export const cloudDb = {
         type: transaction.type,
         amount: transaction.amount,
         description: transaction.description,
+        user_id: userId,
       })
       .select()
       .single();
