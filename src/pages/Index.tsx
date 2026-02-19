@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
@@ -18,7 +18,6 @@ import {
 const Index = () => {
   const { signOut } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
-  const [filteredLoans, setFilteredLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -29,11 +28,7 @@ const Index = () => {
     fetchLoans();
   }, []);
 
-  useEffect(() => {
-    filterLoans();
-  }, [loans, activeTab]);
-
-  const fetchLoans = async () => {
+  const fetchLoans = useCallback(async () => {
     try {
       const data = await cloudDb.getLoans();
       setLoans(data);
@@ -41,31 +36,32 @@ const Index = () => {
       console.error("Erro ao carregar empréstimos:", error);
       toast.error("Erro ao carregar empréstimos");
     }
-  };
+  }, []);
 
-  const filterLoans = () => {
+  const overdueLoans = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    return loans.filter((l) => {
+      if (l.status === "Pago") return false;
+      const dueDate = new Date(l.due_date + "T00:00:00");
+      return dueDate < today;
+    });
+  }, [loans]);
 
+  const filteredLoans = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     switch (activeTab) {
       case "open":
-        setFilteredLoans(loans.filter((l) => l.status === "Aberto"));
-        break;
+        return loans.filter((l) => l.status === "Aberto");
       case "paid":
-        setFilteredLoans(loans.filter((l) => l.status === "Pago"));
-        break;
+        return loans.filter((l) => l.status === "Pago");
       case "overdue":
-        setFilteredLoans(
-          loans.filter((l) => {
-            const dueDate = new Date(l.due_date + "T00:00:00");
-            return l.status === "Aberto" && dueDate < today;
-          })
-        );
-        break;
+        return overdueLoans;
       default:
-        setFilteredLoans(loans);
+        return loans;
     }
-  };
+  }, [loans, activeTab, overdueLoans]);
 
   const handleEdit = (loan: Loan) => {
     setSelectedLoan(loan);
@@ -114,28 +110,22 @@ const Index = () => {
     setHaverDialogOpen(true);
   };
 
-  // Calcular estatísticas
-  const totalLoaned = loans.reduce((sum, l) => sum + Number(l.loan_amount), 0);
-  const totalToReceive = loans
-    .filter((l) => l.status === "Aberto")
-    .reduce((sum, l) => sum + Number(l.amount_to_pay), 0);
-  const totalReceived = loans
-    .filter((l) => l.status === "Pago")
-    .reduce((sum, l) => sum + Number(l.amount_to_pay), 0) +
-    loans
+  const stats = useMemo(() => {
+    const totalLoaned = loans.reduce((sum, l) => sum + Number(l.loan_amount), 0);
+    const totalToReceive = loans
       .filter((l) => l.status === "Aberto")
-      .reduce((sum, l) => sum + Number(l.amount_received), 0);
-  const totalExpectedReturn = loans.reduce((sum, l) => sum + Number(l.amount_to_pay), 0);
-  const totalProfit = totalExpectedReturn - totalLoaned;
-  const profitPercentage = totalLoaned > 0 ? ((totalProfit / totalLoaned) * 100).toFixed(1) : "0.0";
-
-  const overdueLoans = loans.filter((l) => {
-    if (l.status === "Pago") return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dueDate = new Date(l.due_date + "T00:00:00");
-    return dueDate < today;
-  });
+      .reduce((sum, l) => sum + Number(l.amount_to_pay), 0);
+    const totalReceived = loans
+      .filter((l) => l.status === "Pago")
+      .reduce((sum, l) => sum + Number(l.amount_to_pay), 0) +
+      loans
+        .filter((l) => l.status === "Aberto")
+        .reduce((sum, l) => sum + Number(l.amount_received), 0);
+    const totalExpectedReturn = loans.reduce((sum, l) => sum + Number(l.amount_to_pay), 0);
+    const totalProfit = totalExpectedReturn - totalLoaned;
+    const profitPercentage = totalLoaned > 0 ? ((totalProfit / totalLoaned) * 100).toFixed(1) : "0.0";
+    return { totalLoaned, totalToReceive, totalReceived, totalExpectedReturn, totalProfit, profitPercentage };
+  }, [loans]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -161,12 +151,12 @@ const Index = () => {
 
         {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-          <StatCard title="Total Emprestado" value={totalLoaned.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={DollarSign} variant="default" />
-          <StatCard title="Total a Receber" value={totalExpectedReturn.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={TrendingUp} variant="warning" />
-          <StatCard title="A Receber (Abertos)" value={totalToReceive.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={Clock} variant="warning" />
-          <StatCard title="Já Recebido" value={totalReceived.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={CheckCircle} variant="success" />
-          <StatCard title="Lucro Total" value={totalProfit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={TrendingUp} variant="success" />
-          <StatCard title="% Lucro" value={`${profitPercentage}%`} icon={TrendingUp} variant="success" />
+          <StatCard title="Total Emprestado" value={stats.totalLoaned.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={DollarSign} variant="default" />
+          <StatCard title="Total a Receber" value={stats.totalExpectedReturn.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={TrendingUp} variant="warning" />
+          <StatCard title="A Receber (Abertos)" value={stats.totalToReceive.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={Clock} variant="warning" />
+          <StatCard title="Já Recebido" value={stats.totalReceived.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={CheckCircle} variant="success" />
+          <StatCard title="Lucro Total" value={stats.totalProfit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} icon={TrendingUp} variant="success" />
+          <StatCard title="% Lucro" value={`${stats.profitPercentage}%`} icon={TrendingUp} variant="success" />
         </div>
 
         {/* Overdue Alert */}
