@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut } from "lucide-react";
+import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
@@ -8,6 +8,7 @@ import { HaverDialog } from "@/components/HaverDialog";
 import { cloudDb, Loan } from "@/lib/cloudDb";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Tabs,
   TabsContent,
@@ -17,6 +18,7 @@ import {
 
 const Index = () => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [loans, setLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
@@ -139,6 +141,10 @@ const Index = () => {
             <p className="text-muted-foreground mt-1">Gerencie seus empréstimos de forma simples e eficiente</p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={() => navigate("/admin/clientes")} size="lg" variant="outline" className="gap-2">
+              <Users className="h-5 w-5" />
+              Clientes
+            </Button>
             <Button onClick={handleAdd} size="lg" className="gap-2">
               <Plus className="h-5 w-5" />
               Novo Empréstimo
