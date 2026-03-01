@@ -5,6 +5,7 @@ import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HaverDialog } from "@/components/HaverDialog";
+import { HelpDialog } from "@/components/HelpDialog";
 import { cloudDb, Loan } from "@/lib/cloudDb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -163,6 +164,7 @@ const Index = () => {
               <Plus className="h-5 w-5" />
               Novo Empréstimo
             </Button>
+            <HelpDialog />
             <Button onClick={signOut} size="lg" variant="outline" className="gap-2">
               <LogOut className="h-5 w-5" />
             </Button>
