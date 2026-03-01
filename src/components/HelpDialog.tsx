@@ -6,7 +6,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Plus, CreditCard, Clock, Ban, Users, DollarSign, Percent, Edit, Trash2, CheckCircle } from "lucide-react";
+import { HelpCircle, Plus, HandCoins, Clock, DollarSign, Pencil, Trash2, CheckCircle, Calendar, TrendingUp, AlertTriangle, LogOut, Filter } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -55,7 +55,7 @@ export function HelpDialog() {
             />
 
             <HelpSection
-              icon={<Edit className="h-4 w-4" />}
+              icon={<Pencil className="h-4 w-4" />}
               title="Editar Empréstimo"
               description="Clique no ícone de lápis na tabela para alterar os dados de um empréstimo existente, como valores, datas ou status."
             />
@@ -67,15 +67,15 @@ export function HelpDialog() {
             />
 
             <HelpSection
-              icon={<Percent className="h-4 w-4" />}
+              icon={<Calendar className="h-4 w-4" />}
               title="Pagar Juros"
-              description="Clique em 'Juros' para registrar o pagamento dos juros de um empréstimo. O vencimento será adiado em 1 mês automaticamente."
+              description="Clique no ícone de calendário para registrar o pagamento dos juros de um empréstimo. O vencimento será adiado em 1 mês automaticamente."
             />
 
             <HelpSection
-              icon={<CreditCard className="h-4 w-4" />}
+              icon={<HandCoins className="h-4 w-4" />}
               title="Registrar Haver"
-              description="Clique em 'Haver' para registrar um pagamento parcial. O valor recebido será somado ao total já recebido do empréstimo."
+              description="Clique no ícone de moedas na mão para registrar um pagamento parcial. O valor recebido será somado ao total já recebido do empréstimo."
             />
 
             <HelpSection
@@ -88,7 +88,7 @@ export function HelpDialog() {
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Abas de Filtro</h2>
 
             <HelpSection
-              icon={<DollarSign className="h-4 w-4" />}
+              icon={<Filter className="h-4 w-4" />}
               title="Todos / Em Aberto / Pagos / Atrasados"
               description="Use as abas para filtrar os empréstimos. 'Atrasados' mostra empréstimos com vencimento ultrapassado que ainda não foram pagos."
             />
@@ -97,9 +97,24 @@ export function HelpDialog() {
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Estatísticas</h2>
 
             <HelpSection
-              icon={<Clock className="h-4 w-4" />}
+              icon={<TrendingUp className="h-4 w-4" />}
               title="Cards de Resumo"
               description="No topo da página, os cards mostram: Total Emprestado, Total a Receber, A Receber (Abertos), Já Recebido, Lucro Total e % de Lucro sobre o capital investido."
+            />
+
+            <Separator className="my-3" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Outros</h2>
+
+            <HelpSection
+              icon={<AlertTriangle className="h-4 w-4" />}
+              title="Alerta de Atraso"
+              description="Quando há empréstimos vencidos, um alerta vermelho aparece abaixo dos cards de estatísticas indicando a quantidade."
+            />
+
+            <HelpSection
+              icon={<LogOut className="h-4 w-4" />}
+              title="Sair"
+              description="Clique no ícone de seta para sair da sua conta e voltar à tela de login."
             />
           </div>
         </ScrollArea>
