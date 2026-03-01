@@ -6,6 +6,7 @@ import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HaverDialog } from "@/components/HaverDialog";
 import { cloudDb, Loan } from "@/lib/cloudDb";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -17,8 +18,9 @@ import {
 } from "@/components/ui/tabs";
 
 const Index = () => {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loans, setLoans] = useState<Loan[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
@@ -28,7 +30,17 @@ const Index = () => {
 
   useEffect(() => {
     fetchLoans();
-  }, []);
+    // Check admin role
+    if (user) {
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle()
+        .then(({ data }) => setIsAdmin(!!data));
+    }
+  }, [user]);
 
   const fetchLoans = useCallback(async () => {
     try {
@@ -141,10 +153,12 @@ const Index = () => {
             <p className="text-muted-foreground mt-1">Gerencie seus empréstimos de forma simples e eficiente</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => navigate("/admin/clientes")} size="lg" variant="outline" className="gap-2">
-              <Users className="h-5 w-5" />
-              Clientes
-            </Button>
+            {isAdmin && (
+              <Button onClick={() => navigate("/admin/clientes")} size="lg" variant="outline" className="gap-2">
+                <Users className="h-5 w-5" />
+                Clientes
+              </Button>
+            )}
             <Button onClick={handleAdd} size="lg" className="gap-2">
               <Plus className="h-5 w-5" />
               Novo Empréstimo
