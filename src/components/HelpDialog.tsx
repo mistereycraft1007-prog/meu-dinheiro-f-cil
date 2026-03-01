@@ -94,21 +94,6 @@ export function HelpDialog() {
             />
 
             <Separator className="my-3" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Painel do Administrador</h2>
-
-            <HelpSection
-              icon={<Users className="h-4 w-4" />}
-              title="Gestão de Clientes"
-              description="Disponível apenas para o administrador. Permite cadastrar novos clientes, bloquear/desbloquear acessos e remover contas do sistema."
-            />
-
-            <HelpSection
-              icon={<Ban className="h-4 w-4" />}
-              title="Bloquear Cliente"
-              description="Na área de clientes, clique em 'Bloquear' para impedir temporariamente o acesso de um cliente ao sistema. Clique em 'Desbloquear' para restaurar."
-            />
-
-            <Separator className="my-3" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Estatísticas</h2>
 
             <HelpSection
