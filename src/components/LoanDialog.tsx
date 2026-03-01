@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencyInput, parseCurrencyValue } from "@/components/CurrencyInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -35,9 +36,9 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
     if (loan) {
       setFormData({
         person_name: loan.person_name,
-        loan_amount: loan.loan_amount.toString(),
+        loan_amount: loan.loan_amount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
         loan_date: loan.loan_date,
-        amount_to_pay: loan.amount_to_pay.toString(),
+        amount_to_pay: loan.amount_to_pay.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
         due_date: loan.due_date,
         status: loan.status,
       });
@@ -65,9 +66,9 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
     try {
       const loanData = {
         person_name: formData.person_name,
-        loan_amount: parseFloat(formData.loan_amount),
+        loan_amount: parseCurrencyValue(formData.loan_amount),
         loan_date: formData.loan_date,
-        amount_to_pay: parseFloat(formData.amount_to_pay),
+        amount_to_pay: parseCurrencyValue(formData.amount_to_pay),
         due_date: formData.due_date,
         status: formData.status,
       };
@@ -118,8 +119,8 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="loan_amount">Valor Empréstimo *</Label>
-                <Input id="loan_amount" type="number" step="0.01" value={formData.loan_amount} onChange={(e) => setFormData({ ...formData, loan_amount: e.target.value })} placeholder="0.00" />
+              <Label htmlFor="loan_amount">Valor Empréstimo *</Label>
+              <CurrencyInput id="loan_amount" value={formData.loan_amount} onChange={(v) => setFormData({ ...formData, loan_amount: v })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="loan_date">Data Empréstimo *</Label>
@@ -128,8 +129,8 @@ export function LoanDialog({ open, onOpenChange, loan, onSuccess }: LoanDialogPr
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="amount_to_pay">Valor a Pagar *</Label>
-                <Input id="amount_to_pay" type="number" step="0.01" value={formData.amount_to_pay} onChange={(e) => setFormData({ ...formData, amount_to_pay: e.target.value })} placeholder="0.00" />
+              <Label htmlFor="amount_to_pay">Valor a Pagar *</Label>
+              <CurrencyInput id="amount_to_pay" value={formData.amount_to_pay} onChange={(v) => setFormData({ ...formData, amount_to_pay: v })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="due_date">Data Pagamento *</Label>
