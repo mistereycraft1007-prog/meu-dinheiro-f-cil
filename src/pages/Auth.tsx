@@ -62,6 +62,11 @@ export default function Auth() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Aguarde..." : "Entrar"}
             </Button>
+            <div className="text-center">
+              <a href="/forgot-password" className="text-sm text-primary hover:underline">
+                Esqueceu sua senha?
+              </a>
+            </div>
           </form>
         </CardContent>
       </Card>
