@@ -149,7 +149,7 @@ const Index = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Sistema de Empréstimos
+              Meu Dinheiro Fácil
             </h1>
             <p className="text-muted-foreground mt-1">Gerencie seus empréstimos de forma simples e eficiente</p>
           </div>
