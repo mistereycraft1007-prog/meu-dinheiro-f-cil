@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users } from "lucide-react";
+import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
@@ -161,6 +161,9 @@ const Index = () => {
               Novo Empréstimo
             </Button>
             <HelpDialog />
+            <Button onClick={() => navigate("/configuracoes")} size="lg" variant="outline" className="gap-2">
+              <Settings className="h-5 w-5" />
+            </Button>
             <Button onClick={signOut} size="lg" variant="outline" className="gap-2">
               <LogOut className="h-5 w-5" />
             </Button>
