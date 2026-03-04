@@ -6,6 +6,7 @@ import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HaverDialog } from "@/components/HaverDialog";
 import { HelpDialog } from "@/components/HelpDialog";
+import { Logo } from "@/components/Logo";
 import { cloudDb, Loan } from "@/lib/cloudDb";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -147,12 +148,7 @@ const Index = () => {
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Meu Dinheiro Fácil
-            </h1>
-            <p className="text-muted-foreground mt-1">Gerencie seus empréstimos de forma simples e eficiente</p>
-          </div>
+          <Logo size="md" showSlogan />
           <div className="flex gap-2">
             {isAdmin && (
               <Button onClick={() => navigate("/admin/clientes")} size="lg" variant="outline" className="gap-2">

@@ -3,9 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
-import { DollarSign } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -30,12 +30,9 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <DollarSign className="h-6 w-6 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Meu Dinheiro Fácil</CardTitle>
-          <CardDescription>Entre na sua conta</CardDescription>
+        <CardHeader className="text-center flex flex-col items-center">
+          <Logo size="lg" showSlogan />
+          <CardDescription className="mt-3">Entre na sua conta</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
