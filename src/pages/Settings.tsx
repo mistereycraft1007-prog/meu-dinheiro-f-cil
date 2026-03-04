@@ -111,7 +111,7 @@ export default function Settings() {
         {/* Name */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Nome de exibição</CardTitle>
+            <CardTitle className="text-lg">Alterar nome</CardTitle>
             <CardDescription>Como você aparece no sistema</CardDescription>
           </CardHeader>
           <CardContent>
