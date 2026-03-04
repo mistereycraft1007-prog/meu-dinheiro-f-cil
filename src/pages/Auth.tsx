@@ -34,7 +34,7 @@ export default function Auth() {
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <DollarSign className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Sistema de Empréstimos</CardTitle>
+          <CardTitle className="text-2xl">Meu Dinheiro Fácil</CardTitle>
           <CardDescription>Entre na sua conta</CardDescription>
         </CardHeader>
         <CardContent>
