@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings, Search } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
@@ -27,6 +28,7 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [haverDialogOpen, setHaverDialogOpen] = useState(false);
   const [haverLoan, setHaverLoan] = useState<Loan | null>(null);
 
@@ -64,20 +66,31 @@ const Index = () => {
     });
   }, [loans]);
 
+  const searchedLoans = useMemo(() => {
+    if (!searchQuery.trim()) return loans;
+    const q = searchQuery.toLowerCase();
+    return loans.filter((l) => l.person_name.toLowerCase().includes(q));
+  }, [loans, searchQuery]);
+
   const filteredLoans = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const base = searchedLoans;
     switch (activeTab) {
       case "open":
-        return loans.filter((l) => l.status === "Aberto");
+        return base.filter((l) => l.status === "Aberto");
       case "paid":
-        return loans.filter((l) => l.status === "Pago");
+        return base.filter((l) => l.status === "Pago");
       case "overdue":
-        return overdueLoans;
+        return base.filter((l) => {
+          if (l.status === "Pago") return false;
+          const dueDate = new Date(l.due_date + "T00:00:00");
+          return dueDate < today;
+        });
       default:
-        return loans;
+        return base;
     }
-  }, [loans, activeTab, overdueLoans]);
+  }, [searchedLoans, activeTab]);
 
   const handleEdit = (loan: Loan) => {
     setSelectedLoan(loan);
@@ -193,12 +206,23 @@ const Index = () => {
           </div>
         )}
 
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar cliente..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
         {/* Loans Table with Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4 lg:w-auto">
-            <TabsTrigger value="all">Todos ({loans.length})</TabsTrigger>
-            <TabsTrigger value="open">Em Aberto ({loans.filter((l) => l.status === "Aberto").length})</TabsTrigger>
-            <TabsTrigger value="paid">Pagos ({loans.filter((l) => l.status === "Pago").length})</TabsTrigger>
+            <TabsTrigger value="all">Todos ({searchedLoans.length})</TabsTrigger>
+            <TabsTrigger value="open">Em Aberto ({searchedLoans.filter((l) => l.status === "Aberto").length})</TabsTrigger>
+            <TabsTrigger value="paid">Pagos ({searchedLoans.filter((l) => l.status === "Pago").length})</TabsTrigger>
             <TabsTrigger value="overdue">Atrasados ({overdueLoans.length})</TabsTrigger>
           </TabsList>
           <TabsContent value={activeTab} className="mt-4">
