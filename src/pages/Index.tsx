@@ -7,6 +7,7 @@ import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HaverDialog } from "@/components/HaverDialog";
 import { HelpDialog } from "@/components/HelpDialog";
+import { TransactionsTab } from "@/components/TransactionsTab";
 import { Logo } from "@/components/Logo";
 import { cloudDb, Loan } from "@/lib/cloudDb";
 import { supabase } from "@/integrations/supabase/client";
