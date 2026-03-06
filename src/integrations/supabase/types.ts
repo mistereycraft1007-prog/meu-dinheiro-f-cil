@@ -93,7 +93,7 @@ export type Database = {
           date: string
           description: string
           id: string
-          loan_id: string
+          loan_id: string | null
           type: string
           user_id: string
         }
@@ -103,7 +103,7 @@ export type Database = {
           date?: string
           description: string
           id?: string
-          loan_id: string
+          loan_id?: string | null
           type: string
           user_id: string
         }
@@ -113,7 +113,7 @@ export type Database = {
           date?: string
           description?: string
           id?: string
-          loan_id?: string
+          loan_id?: string | null
           type?: string
           user_id?: string
         }
