@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings, Search } from "lucide-react";
+import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings, Search, History } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { LoansTable } from "@/components/LoansTable";
 import { LoanDialog } from "@/components/LoanDialog";
 import { HaverDialog } from "@/components/HaverDialog";
 import { HelpDialog } from "@/components/HelpDialog";
+import { TransactionsTab } from "@/components/TransactionsTab";
 import { Logo } from "@/components/Logo";
 import { cloudDb, Loan } from "@/lib/cloudDb";
 import { supabase } from "@/integrations/supabase/client";
@@ -219,20 +220,30 @@ const Index = () => {
 
         {/* Loans Table with Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto">
             <TabsTrigger value="all">Todos ({searchedLoans.length})</TabsTrigger>
             <TabsTrigger value="open">Em Aberto ({searchedLoans.filter((l) => l.status === "Aberto").length})</TabsTrigger>
             <TabsTrigger value="paid">Pagos ({searchedLoans.filter((l) => l.status === "Pago").length})</TabsTrigger>
             <TabsTrigger value="overdue">Atrasados ({overdueLoans.length})</TabsTrigger>
+            <TabsTrigger value="history" className="gap-1">
+              <History className="h-4 w-4" />
+              Histórico
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value={activeTab} className="mt-4">
-            <LoansTable
-              loans={filteredLoans}
-              onEdit={handleEdit}
-              onDelete={fetchLoans}
-              onPayInterest={handlePayInterest}
-              onHaver={handleHaver}
-            />
+          <TabsContent value="all" className="mt-4">
+            <LoansTable loans={filteredLoans} onEdit={handleEdit} onDelete={fetchLoans} onPayInterest={handlePayInterest} onHaver={handleHaver} />
+          </TabsContent>
+          <TabsContent value="open" className="mt-4">
+            <LoansTable loans={filteredLoans} onEdit={handleEdit} onDelete={fetchLoans} onPayInterest={handlePayInterest} onHaver={handleHaver} />
+          </TabsContent>
+          <TabsContent value="paid" className="mt-4">
+            <LoansTable loans={filteredLoans} onEdit={handleEdit} onDelete={fetchLoans} onPayInterest={handlePayInterest} onHaver={handleHaver} />
+          </TabsContent>
+          <TabsContent value="overdue" className="mt-4">
+            <LoansTable loans={filteredLoans} onEdit={handleEdit} onDelete={fetchLoans} onPayInterest={handlePayInterest} onHaver={handleHaver} />
+          </TabsContent>
+          <TabsContent value="history" className="mt-4">
+            <TransactionsTab />
           </TabsContent>
         </Tabs>
       </div>
