@@ -174,6 +174,10 @@ const Index = () => {
               <Plus className="h-5 w-5" />
               Novo Empréstimo
             </Button>
+            <Button onClick={() => setActiveTab("history")} size="lg" variant="outline" className="gap-2">
+              <History className="h-5 w-5" />
+              Histórico
+            </Button>
             <HelpDialog />
             <Button onClick={() => navigate("/configuracoes")} size="lg" variant="outline" className="gap-2">
               <Settings className="h-5 w-5" />
