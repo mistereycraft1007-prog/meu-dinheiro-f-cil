@@ -5,7 +5,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Transaction } from "@/lib/cloudDb";
-import { DollarSign, Calendar, PlusCircle, Pencil, CreditCard, Loader2 } from "lucide-react";
+import { DollarSign, Calendar, PlusCircle, Pencil, CreditCard, Loader2, Trash2 } from "lucide-react";
 
 const typeConfig: Record<string, { label: string; icon: React.ElementType }> = {
   criacao: { label: "Criação", icon: PlusCircle },
@@ -13,6 +13,7 @@ const typeConfig: Record<string, { label: string; icon: React.ElementType }> = {
   juros: { label: "Pagou Juros", icon: Calendar },
   pagamento_total: { label: "Pagou Tudo", icon: CreditCard },
   edicao: { label: "Edição", icon: Pencil },
+  exclusao: { label: "Exclusão", icon: Trash2 },
 };
 
 const typeBadgeVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -21,6 +22,7 @@ const typeBadgeVariant: Record<string, "default" | "secondary" | "destructive" |
   juros: "secondary",
   pagamento_total: "default",
   edicao: "secondary",
+  exclusao: "destructive",
 };
 
 interface TransactionWithLoan extends Transaction {
