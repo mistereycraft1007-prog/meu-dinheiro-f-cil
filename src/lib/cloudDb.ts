@@ -106,7 +106,7 @@ export const cloudDb = {
     return (data || []) as Transaction[];
   },
 
-  addTransaction: async (transaction: Omit<Transaction, "id" | "created_at" | "date">): Promise<Transaction> => {
+  addTransaction: async (transaction: Omit<Transaction, "id" | "created_at" | "date"> & { loan_id: string }): Promise<Transaction> => {
     const userId = await getUserId();
     const { data, error } = await supabase
       .from("transactions")
