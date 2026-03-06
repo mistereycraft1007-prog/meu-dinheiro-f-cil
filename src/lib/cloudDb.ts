@@ -79,6 +79,19 @@ export const cloudDb = {
   },
 
   deleteLoan: async (id: string): Promise<void> => {
+    // Get loan info before deleting for the log
+    const { data: loan } = await supabase.from("loans").select("person_name, loan_amount").eq("id", id).single();
+    
+    // Log deletion
+    if (loan) {
+      await cloudDb.addTransaction({
+        loan_id: id,
+        type: "exclusao",
+        amount: Number(loan.loan_amount),
+        description: `Empréstimo de ${loan.person_name} excluído - Valor: R$ ${Number(loan.loan_amount).toFixed(2)}`,
+      });
+    }
+
     const { error } = await supabase.from("loans").delete().eq("id", id);
     if (error) throw error;
   },
