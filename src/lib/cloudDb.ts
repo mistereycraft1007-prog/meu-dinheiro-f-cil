@@ -21,7 +21,7 @@ export interface Loan {
 
 export interface Transaction {
   id: string;
-  loan_id: string;
+  loan_id: string | null;
   type: "haver" | "juros" | "pagamento_total" | "criacao" | "edicao";
   amount: number;
   description: string;
