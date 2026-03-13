@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings, Search, History } from "lucide-react";
@@ -33,18 +33,23 @@ const Index = () => {
   const [haverDialogOpen, setHaverDialogOpen] = useState(false);
   const [haverLoan, setHaverLoan] = useState<Loan | null>(null);
 
+  const hasFetchedInitialDataRef = useRef<string | null>(null);
+
   useEffect(() => {
+    if (!user?.id) return;
+    if (hasFetchedInitialDataRef.current === user.id) return;
+
+    hasFetchedInitialDataRef.current = user.id;
     fetchLoans();
+
     // Check admin role
-    if (user) {
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle()
-        .then(({ data }) => setIsAdmin(!!data));
-    }
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => setIsAdmin(!!data));
   }, [user?.id]);
 
   const fetchLoans = useCallback(async () => {
