@@ -45,7 +45,7 @@ const Index = () => {
         .maybeSingle()
         .then(({ data }) => setIsAdmin(!!data));
     }
-  }, [user]);
+  }, [user?.id]);
 
   const fetchLoans = useCallback(async () => {
     try {
