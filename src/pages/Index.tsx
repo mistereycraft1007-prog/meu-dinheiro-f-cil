@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, DollarSign, TrendingUp, Clock, CheckCircle, AlertTriangle, LogOut, Users, Settings, Search, History } from "lucide-react";
