@@ -22,25 +22,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const manualSignOutRef = useRef(false);
+
+  const applyAuthState = (nextSession: Session | null) => {
+    setSession((prev) =>
+      prev?.access_token === nextSession?.access_token ? prev : nextSession
+    );
+    setUser((prev) => {
+      const nextUser = nextSession?.user ?? null;
+      return prev?.id === nextUser?.id ? prev : nextUser;
+    });
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "TOKEN_REFRESHED") return;
+
+      // Evita logout por eventos transitórios durante refresh/rate-limit
+      if (event === "SIGNED_OUT" && !manualSignOutRef.current) {
+        window.setTimeout(async () => {
+          const {
+            data: { session: recoveredSession },
+          } = await supabase.auth.getSession();
+          applyAuthState(recoveredSession ?? null);
+        }, 250);
+        return;
+      }
+
+      applyAuthState(nextSession);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      applyAuthState(initialSession ?? null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    manualSignOutRef.current = true;
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      manualSignOutRef.current = false;
+    }
   };
 
   return (
